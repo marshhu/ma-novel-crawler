@@ -1,7 +1,6 @@
 package biquge
 
 import (
-	"fmt"
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
 	"ma-novel-crawler/parser/model"
@@ -41,7 +40,7 @@ func (p *ChapterListParser) Parse(contents []byte, url string) parser.ParseResul
 	if findNode != nil {
 		bookInfo.BookImage = htmlquery.SelectAttr(findNode, "src")
 	}
-	fmt.Println(bookInfo)
+	//fmt.Println(bookInfo)
 	result.Data = bookInfo
 
 	list := htmlquery.Find(root, "//div[@id='list']/dl/dd")
@@ -66,7 +65,7 @@ func (p *ChapterListParser) Parse(contents []byte, url string) parser.ParseResul
 		linkInfo := parser.LinkInfo{Url: link, Info: chapter}
 		result.LinkInfos = append(result.LinkInfos, linkInfo)
 	}
-	fmt.Println(chapters)
+	//fmt.Println(chapters)
 	return result
 }
 

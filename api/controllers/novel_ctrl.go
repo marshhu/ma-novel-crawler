@@ -12,7 +12,7 @@ type NovelController struct {
 }
 
 // @Description 生成单本小说txt
-// @Tags article
+// @Tags novels
 // @Produce  json
 // @Param url query string true " "
 // @Success 200

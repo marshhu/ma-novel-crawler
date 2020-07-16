@@ -1,7 +1,6 @@
 package biquge
 
 import (
-	"fmt"
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
 	"regexp"
@@ -27,7 +26,7 @@ func (p *ChapterDetailParser) Parse(contents []byte, url string) parser.ParseRes
 		//替换换行<br>为\n
 		brRg := regexp.MustCompile(`<br>`)
 		chapterContent = brRg.ReplaceAllString(chapterContent, "\n")
-		fmt.Println(chapterContent)
+		//fmt.Println(chapterContent)
 		result.Data = chapterContent
 	}
 	return result
