@@ -1,25 +1,19 @@
 package parser
 
 type Parser interface {
-	Parse(contents []byte, url string) ParseResult
+	Parse(crawlerUrl string,contents []byte) (*ParseResult,error)
 	Serialize() (name string, args interface{})
 }
 
-type Request struct {
-	BaseUrl string
-	Url     string
-	Parser  Parser
-}
-
 type ParseResult struct {
-	Requests  []Request
-	LinkInfos []LinkInfo
 	Data      interface{}
+	Requests  map[string]UrlParser
 }
 
-type LinkInfo struct {
-	Url  string
-	Info interface{}
+type UrlParser struct {
+	Url string
+	UrlText string
+	Parser
 }
 
 type NilParser struct{}

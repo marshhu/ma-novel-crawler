@@ -3,6 +3,7 @@ package biquge
 import (
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
+	"net/url"
 	"strings"
 )
 
@@ -13,48 +14,43 @@ func NewNovelListParser() *NovelListParser {
 	return &NovelListParser{}
 }
 
-func (p *NovelListParser) Parse(contents []byte, url string) parser.ParseResult {
-	result := parser.ParseResult{}
+func (p *NovelListParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error){
+	u,err:= url.Parse(crawlerUrl)
+	if err!= nil{
+		return nil,err
+	}
+	result := &parser.ParseResult{}
+	result.Requests = make(map[string]parser.UrlParser)
+
 	root, _ := htmlquery.Parse(strings.NewReader(string(contents)))
 	list := htmlquery.Find(root, "//div[@id='hotcontent']/div/div/dl/dt")
 	for _, row := range list {
-		var link, title string
 		linkNode := htmlquery.FindOne(row, "./a")
 		if linkNode != nil {
-			link = htmlquery.SelectAttr(linkNode, "href")
+			link := htmlquery.SelectAttr(linkNode, "href")
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-				link = url + link
+				link = u.Scheme+"://"+u.Host + link
 			}
-			title = htmlquery.InnerText(linkNode)
+			result.Requests[link] =parser.UrlParser{ Parser: NewChapterListParser(),UrlText:htmlquery.InnerText(linkNode)}
 		}
-
-		request := parser.Request{Url: link, Parser: NewChapterListParser(), BaseUrl: url}
-		result.Requests = append(result.Requests, request)
-		linkInfo := parser.LinkInfo{Url: link, Info: title}
-		result.LinkInfos = append(result.LinkInfos, linkInfo)
 	}
 
 	list = htmlquery.Find(root, "//div[@id='newscontent']/div/ul/li")
 	for _, row := range list {
-		var link, title string
 		spanNodes := htmlquery.Find(row, "./span")
 		if len(spanNodes) > 0 {
 			linkNode := htmlquery.FindOne(spanNodes[0], "./a")
 			if linkNode != nil {
-				link = htmlquery.SelectAttr(linkNode, "href")
+				link := htmlquery.SelectAttr(linkNode, "href")
 				if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-					link = url + link
+					link = u.Scheme+"://"+u.Host + link
 				}
-				title = htmlquery.InnerText(linkNode)
+				result.Requests[link] =parser.UrlParser{Url:link, Parser: NewChapterListParser(),UrlText:htmlquery.InnerText(linkNode)}
 			}
 		}
-		request := parser.Request{Url: link, Parser: parser.NilParser{}}
-		result.Requests = append(result.Requests, request)
-		linkInfo := parser.LinkInfo{Url: link, Info: title}
-		result.LinkInfos = append(result.LinkInfos, linkInfo)
 	}
 
-	return result
+	return result,nil
 }
 
 func (p *NovelListParser) Serialize() (name string, args interface{}) {

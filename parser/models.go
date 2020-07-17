@@ -1,4 +1,4 @@
-package model
+package parser
 
 type BookInfo struct {
 	BookName      string `json:"bookName"`

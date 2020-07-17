@@ -3,7 +3,7 @@ package biquge
 import (
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
-	"ma-novel-crawler/parser/model"
+	"net/url"
 	"strings"
 )
 
@@ -14,11 +14,17 @@ func NewChapterListParser() *ChapterListParser {
 	return &ChapterListParser{}
 }
 
-func (p *ChapterListParser) Parse(contents []byte, url string) parser.ParseResult {
-	result := parser.ParseResult{}
+func (p *ChapterListParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error) {
+	u,err:= url.Parse(crawlerUrl)
+	if err!= nil{
+		return nil,err
+	}
+	result := &parser.ParseResult{}
+	result.Requests = make(map[string]parser.UrlParser)
+
 	root, _ := htmlquery.Parse(strings.NewReader(string(contents)))
 	//获取小说信息
-	bookInfo := model.BookInfo{}
+	bookInfo := parser.BookInfo{}
 	findNode := htmlquery.FindOne(root, "//div[@id='info']")
 	if findNode != nil {
 		h1Node := htmlquery.FindOne(findNode, "./h1")
@@ -44,29 +50,18 @@ func (p *ChapterListParser) Parse(contents []byte, url string) parser.ParseResul
 	result.Data = bookInfo
 
 	list := htmlquery.Find(root, "//div[@id='list']/dl/dd")
-	var chapters []model.BookChapter
-	index := 0
 	for _, row := range list {
-		index++
-		var link, text string
 		linkNode := htmlquery.FindOne(row, "./a")
 		if linkNode != nil {
-			link = htmlquery.SelectAttr(linkNode, "href")
+			link := htmlquery.SelectAttr(linkNode, "href")
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-				link = url + link
+				link = u.Scheme+"://"+u.Host + link
 			}
-			text = htmlquery.InnerText(linkNode)
+			result.Requests[link] =parser.UrlParser{ Url:link,Parser: NewChapterDetailParser(),UrlText:htmlquery.InnerText(linkNode)}
 		}
-
-		request := parser.Request{Url: link, Parser: NewChapterDetailParser()}
-		result.Requests = append(result.Requests, request)
-		chapter := model.BookChapter{Index: index, Name: text}
-		chapters = append(chapters, chapter)
-		linkInfo := parser.LinkInfo{Url: link, Info: chapter}
-		result.LinkInfos = append(result.LinkInfos, linkInfo)
 	}
 	//fmt.Println(chapters)
-	return result
+	return result,nil
 }
 
 func (p *ChapterListParser) Serialize() (name string, args interface{}) {

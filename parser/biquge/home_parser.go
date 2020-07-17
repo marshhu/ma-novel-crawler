@@ -3,6 +3,7 @@ package biquge
 import (
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
+	"net/url"
 	"strings"
 )
 
@@ -13,8 +14,14 @@ func NewHomeParse() *HomeParser {
 	return &HomeParser{}
 }
 
-func (p *HomeParser) Parse(contents []byte, url string) parser.ParseResult {
-	result := parser.ParseResult{}
+func (p *HomeParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error){
+	u,err:= url.Parse(crawlerUrl)
+	if err!= nil{
+       return nil,err
+	}
+	result := &parser.ParseResult{}
+	result.Requests = make(map[string]parser.UrlParser)
+
 	root, _ := htmlquery.Parse(strings.NewReader(string(contents)))
 	list := htmlquery.Find(root, "//div[@class='nav']/ul/li")
 	for _, row := range list {
@@ -25,15 +32,12 @@ func (p *HomeParser) Parse(contents []byte, url string) parser.ParseResult {
 				continue
 			}
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-				link = url + link
+				link = u.Scheme+"://"+u.Host + link
 			}
-			request := parser.Request{Url: link, Parser: NewNovelListParser(), BaseUrl: url}
-			result.Requests = append(result.Requests, request)
-			linkInfo := parser.LinkInfo{Url: link, Info: htmlquery.InnerText(linkNode)}
-			result.LinkInfos = append(result.LinkInfos, linkInfo)
+			result.Requests[link] =parser.UrlParser{Url:link, Parser: NewNovelListParser(),UrlText:htmlquery.InnerText(linkNode)}
 		}
 	}
-	return result
+	return result,nil
 }
 
 func (p *HomeParser) Serialize() (name string, args interface{}) {

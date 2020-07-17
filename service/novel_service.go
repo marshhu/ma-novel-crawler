@@ -6,9 +6,9 @@ import (
 	"ma-novel-crawler/fetcher"
 	"ma-novel-crawler/parser"
 	"ma-novel-crawler/parser/biquge"
-	"ma-novel-crawler/parser/model"
 	"net/http"
 	"net/url"
+	"sync"
 )
 
 type NovelService struct {
@@ -16,42 +16,76 @@ type NovelService struct {
 }
 
 func(s *NovelService)GetSingleNovel(novelUrl string) (bookName string,content *bytes.Buffer,err error){
-	u,err := url.Parse(novelUrl)
+	_,err = url.Parse(novelUrl)
 	if err !=nil{
 		return "",nil,err
 	}
-	request := parser.Request{Url: novelUrl, Parser: biquge.NewChapterListParser(), BaseUrl: u.Scheme+"://"+u.Host}
-	status, contents, err := fetcher.Fetcher(request.Url, "", 5)
+	status, contents, err := fetcher.Fetcher(novelUrl, "", 5)
 	if err != nil {
 		return "",nil,errors.New("访问站点失败")
 	}
 	if status != http.StatusOK {
 		return "",nil,errors.New("访问站点失败")
 	}
-	bookParseResult := request.Parser.Parse(contents, request.BaseUrl)
-	bookInfo,ok := bookParseResult.Data.(model.BookInfo)
+	chapterParser := biquge.NewChapterListParser()
+	parseResult,err:= chapterParser.Parse(novelUrl,contents)
+	if err!=nil{
+		return "",nil,err
+	}
+	bookInfo,ok := parseResult.Data.(parser.BookInfo)
 	if !ok{
 		return "",nil,errors.New("解析小说信息失败")
 	}
 	bookName = bookInfo.BookName
-	buf := new(bytes.Buffer)
-	for index,chapterReq := range bookParseResult.Requests{
-		status, contents, err := fetcher.Fetcher(chapterReq.Url, "", 5)
+
+	inputChan := make(chan parser.UrlParser,10)
+	outputChan := make(chan NovelChapter,10)
+	buffer := new(bytes.Buffer)
+	var mutex sync.Mutex
+	go createJob(parseResult.Requests,inputChan)
+	go handleOutPut(outputChan,&mutex,buffer)
+	var wg sync.WaitGroup
+	workerNum := 20
+    for i:=0;i<workerNum;i++{
+    	wg.Add(1)
+        go worker(inputChan,outputChan,&wg)
+	}
+	wg.Wait()
+    close(outputChan)
+	return bookName,buffer,nil
+}
+
+func createJob(requests map[string]parser.UrlParser,inputChan chan parser.UrlParser){
+	for _,request := range requests{
+		inputChan <- request
+	}
+	close(inputChan)
+}
+
+func worker(inputChan <-chan parser.UrlParser,outputChan chan NovelChapter,wg *sync.WaitGroup){
+	defer wg.Done()
+    for request := range inputChan{
+		status, contents, err := fetcher.Fetcher(request.Url, "", 5)
 		if err != nil {
-			return "",nil,errors.New("访问章节站点失败")
+			return
 		}
 		if status != http.StatusOK {
-			return "",nil,errors.New("访问章节站点失败")
+			return
 		}
-		chapterParseResult := chapterReq.Parser.Parse(contents, chapterReq.BaseUrl)
+		chapterParseResult,err := request.Parse(request.Url,contents)
+		if err!=nil{
+			continue
+		}
 		chapterContent := chapterParseResult.Data.(string)
-		chapterInfo := bookParseResult.LinkInfos[index]
-		chapter :=chapterInfo.Info.(model.BookChapter)
-
-		buf.WriteString(chapter.Name+"\n\n")
-		buf.WriteString(chapterContent+"\n")
-		break
+		outputChan <- NovelChapter{Url: request.Url,Content: chapterContent,ChapterName: request.UrlText}
 	}
+}
 
-	return bookName,buf,nil
+func handleOutPut(outputChan chan NovelChapter,mutex *sync.Mutex,buffer *bytes.Buffer){
+	for parseResult := range outputChan{
+		mutex.Lock()
+		buffer.WriteString(parseResult.ChapterName+"\n\n")
+		buffer.WriteString(parseResult.Content+"\n")
+		mutex.Unlock()
+	}
 }

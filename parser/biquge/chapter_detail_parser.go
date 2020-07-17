@@ -3,6 +3,7 @@ package biquge
 import (
 	"github.com/antchfx/htmlquery"
 	"ma-novel-crawler/parser"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -13,8 +14,14 @@ type ChapterDetailParser struct {
 func NewChapterDetailParser() *ChapterDetailParser {
 	return &ChapterDetailParser{}
 }
-func (p *ChapterDetailParser) Parse(contents []byte, url string) parser.ParseResult {
-	result := parser.ParseResult{}
+func (p *ChapterDetailParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error) {
+	_,err:= url.Parse(crawlerUrl)
+	if err!= nil{
+		return nil,err
+	}
+	result := &parser.ParseResult{}
+	result.Requests = make(map[string]parser.UrlParser)
+
 	root, _ := htmlquery.Parse(strings.NewReader(string(contents)))
 	findNode := htmlquery.FindOne(root, "//div[@id='content']")
 	var chapterContent string
@@ -29,7 +36,7 @@ func (p *ChapterDetailParser) Parse(contents []byte, url string) parser.ParseRes
 		//fmt.Println(chapterContent)
 		result.Data = chapterContent
 	}
-	return result
+	return result,nil
 }
 
 func (p *ChapterDetailParser) Serialize() (name string, args interface{}) {
