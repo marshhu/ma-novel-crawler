@@ -9,7 +9,7 @@ import (
 )
 
 func Test_ChapterDetailParser(t *testing.T) {
-	url :="https://www.biquge.com.cn/book/43108/348013.html"
+	url := "https://www.biquge.com.cn/book/43108/348013.html"
 	status, contents, err := fetcher.Fetcher(url, "", 5)
 	if err != nil {
 		t.FailNow()
@@ -17,10 +17,11 @@ func Test_ChapterDetailParser(t *testing.T) {
 	if status != http.StatusOK {
 		t.FailNow()
 	}
-	parser := biquge.NewHomeParse()
-	result,err := parser.Parse(url,contents)
-	if err!=nil{
+
+	chapterDetailParser := biquge.NewChapterDetailParser(nil)
+	chapterDetailResult, err := chapterDetailParser.Parse(url, contents)
+	if err != nil {
 		t.FailNow()
 	}
-	fmt.Println(result)
+	fmt.Println(chapterDetailResult)
 }

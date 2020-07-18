@@ -9,7 +9,7 @@ import (
 )
 
 func Test_ChapterListParser(t *testing.T) {
-	url :="https://www.biquge.com.cn/book/43108/"
+	url := "https://www.biquge.com.cn/book/43108/"
 	status, contents, err := fetcher.Fetcher(url, "", 5)
 	if err != nil {
 		t.FailNow()
@@ -18,8 +18,8 @@ func Test_ChapterListParser(t *testing.T) {
 		t.FailNow()
 	}
 	parser := biquge.NewChapterListParser()
-	result,err := parser.Parse(url,contents)
-	if err!=nil{
+	result, err := parser.Parse(url, contents)
+	if err != nil {
 		t.FailNow()
 	}
 	fmt.Println(result)

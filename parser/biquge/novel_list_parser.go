@@ -14,10 +14,10 @@ func NewNovelListParser() *NovelListParser {
 	return &NovelListParser{}
 }
 
-func (p *NovelListParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error){
-	u,err:= url.Parse(crawlerUrl)
-	if err!= nil{
-		return nil,err
+func (p *NovelListParser) Parse(crawlerUrl string, contents []byte) (*parser.ParseResult, error) {
+	u, err := url.Parse(crawlerUrl)
+	if err != nil {
+		return nil, err
 	}
 	result := &parser.ParseResult{}
 	result.Requests = make(map[string]parser.UrlParser)
@@ -29,9 +29,9 @@ func (p *NovelListParser) Parse(crawlerUrl string,contents []byte) (*parser.Pars
 		if linkNode != nil {
 			link := htmlquery.SelectAttr(linkNode, "href")
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-				link = u.Scheme+"://"+u.Host + link
+				link = u.Scheme + "://" + u.Host + link
 			}
-			result.Requests[link] =parser.UrlParser{ Parser: NewChapterListParser(),UrlText:htmlquery.InnerText(linkNode)}
+			result.Requests[link] = parser.UrlParser{Parser: NewChapterListParser(), UrlInfo: parser.UrlInfo{Url: link, Text: htmlquery.InnerText(linkNode)}}
 		}
 	}
 
@@ -43,14 +43,14 @@ func (p *NovelListParser) Parse(crawlerUrl string,contents []byte) (*parser.Pars
 			if linkNode != nil {
 				link := htmlquery.SelectAttr(linkNode, "href")
 				if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-					link = u.Scheme+"://"+u.Host + link
+					link = u.Scheme + "://" + u.Host + link
 				}
-				result.Requests[link] =parser.UrlParser{Url:link, Parser: NewChapterListParser(),UrlText:htmlquery.InnerText(linkNode)}
+				result.Requests[link] = parser.UrlParser{Parser: NewChapterListParser(), UrlInfo: parser.UrlInfo{Url: link, Text: htmlquery.InnerText(linkNode)}}
 			}
 		}
 	}
 
-	return result,nil
+	return result, nil
 }
 
 func (p *NovelListParser) Serialize() (name string, args interface{}) {

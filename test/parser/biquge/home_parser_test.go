@@ -9,7 +9,7 @@ import (
 )
 
 func Test_HomeParser(t *testing.T) {
-	url :="https://www.biquge.com.cn/"
+	url := "https://www.biquge.com.cn/"
 	status, contents, err := fetcher.Fetcher(url, "", 5)
 	if err != nil {
 		t.FailNow()
@@ -18,8 +18,8 @@ func Test_HomeParser(t *testing.T) {
 		t.FailNow()
 	}
 	parser := biquge.NewHomeParse()
-	result,err := parser.Parse(url,contents)
-	if err!=nil{
+	result, err := parser.Parse(url, contents)
+	if err != nil {
 		t.FailNow()
 	}
 	fmt.Println(result)

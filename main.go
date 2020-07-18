@@ -22,8 +22,8 @@ func Run() {
 	s := &http.Server{
 		Addr:           host,
 		Handler:        router,
-		ReadTimeout:    time.Duration(5) * time.Second,
-		WriteTimeout:   time.Duration(5) * time.Second,
+		ReadTimeout:    time.Duration(60) * time.Second,
+		WriteTimeout:   time.Duration(60) * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 	go func() {

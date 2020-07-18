@@ -14,10 +14,10 @@ func NewHomeParse() *HomeParser {
 	return &HomeParser{}
 }
 
-func (p *HomeParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error){
-	u,err:= url.Parse(crawlerUrl)
-	if err!= nil{
-       return nil,err
+func (p *HomeParser) Parse(crawlerUrl string, contents []byte) (*parser.ParseResult, error) {
+	u, err := url.Parse(crawlerUrl)
+	if err != nil {
+		return nil, err
 	}
 	result := &parser.ParseResult{}
 	result.Requests = make(map[string]parser.UrlParser)
@@ -32,12 +32,12 @@ func (p *HomeParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResu
 				continue
 			}
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
-				link = u.Scheme+"://"+u.Host + link
+				link = u.Scheme + "://" + u.Host + link
 			}
-			result.Requests[link] =parser.UrlParser{Url:link, Parser: NewNovelListParser(),UrlText:htmlquery.InnerText(linkNode)}
+			result.Requests[link] = parser.UrlParser{Parser: NewNovelListParser(), UrlInfo: parser.UrlInfo{Url: link, Text: htmlquery.InnerText(linkNode)}}
 		}
 	}
-	return result,nil
+	return result, nil
 }
 
 func (p *HomeParser) Serialize() (name string, args interface{}) {

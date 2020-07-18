@@ -9,15 +9,16 @@ import (
 )
 
 type ChapterDetailParser struct {
+	novel *parser.Novel
 }
 
-func NewChapterDetailParser() *ChapterDetailParser {
-	return &ChapterDetailParser{}
+func NewChapterDetailParser(_novel *parser.Novel) *ChapterDetailParser {
+	return &ChapterDetailParser{novel: _novel}
 }
-func (p *ChapterDetailParser) Parse(crawlerUrl string,contents []byte) (*parser.ParseResult,error) {
-	_,err:= url.Parse(crawlerUrl)
-	if err!= nil{
-		return nil,err
+func (p *ChapterDetailParser) Parse(crawlerUrl string, contents []byte) (*parser.ParseResult, error) {
+	_, err := url.Parse(crawlerUrl)
+	if err != nil {
+		return nil, err
 	}
 	result := &parser.ParseResult{}
 	result.Requests = make(map[string]parser.UrlParser)
@@ -34,9 +35,19 @@ func (p *ChapterDetailParser) Parse(crawlerUrl string,contents []byte) (*parser.
 		brRg := regexp.MustCompile(`<br>`)
 		chapterContent = brRg.ReplaceAllString(chapterContent, "\n")
 		//fmt.Println(chapterContent)
-		result.Data = chapterContent
+		chapter := parser.NovelChapter{}
+		chapter.Content = chapterContent
+		if p.novel != nil {
+			if _, ok := p.novel.Chapters[crawlerUrl]; ok {
+				p.novel.Chapters[crawlerUrl].Content = chapterContent
+				chapter.Index = p.novel.Chapters[crawlerUrl].Index
+				chapter.Name = p.novel.Chapters[crawlerUrl].Name
+			}
+		}
+		result.Data = chapter
 	}
-	return result,nil
+
+	return result, nil
 }
 
 func (p *ChapterDetailParser) Serialize() (name string, args interface{}) {
