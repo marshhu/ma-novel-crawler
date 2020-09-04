@@ -1,0 +1,22 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /novels:
+    get:
+      description: 生成单本小说txt
+      parameters:
+      - description: ' '
+        in: query
+        name: novelUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200": {}
+        "500":
+          description: error info
+      tags:
+      - novels
+swagger: "2.0"

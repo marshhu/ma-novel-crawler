@@ -1,0 +1,35 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "license": {}
+    },
+    "paths": {
+        "/novels": {
+            "get": {
+                "description": "生成单本小说txt",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "novels"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": " ",
+                        "name": "novelUrl",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {},
+                    "500": {
+                        "description": "error info"
+                    }
+                }
+            }
+        }
+    }
+}
