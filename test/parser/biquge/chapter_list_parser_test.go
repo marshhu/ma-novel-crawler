@@ -2,8 +2,8 @@ package biquge
 
 import (
 	"fmt"
-	"ma-novel-crawler/fetcher"
-	"ma-novel-crawler/parser/biquge"
+	"github.com/marshhu/ma-novel-crawler/fetcher"
+	"github.com/marshhu/ma-novel-crawler/parser/biquge"
 	"net/http"
 	"testing"
 )

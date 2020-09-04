@@ -2,7 +2,7 @@ package biquge
 
 import (
 	"github.com/antchfx/htmlquery"
-	"ma-novel-crawler/parser"
+	"github.com/marshhu/ma-novel-crawler/parser"
 	"net/url"
 	"regexp"
 	"strings"
@@ -37,18 +37,18 @@ func (p *ChapterListParser) Parse(crawlerUrl string, contents []byte) (*parser.P
 		pNodes := htmlquery.Find(findNode, "./p")
 		if len(pNodes) >= 4 {
 			authorText := htmlquery.InnerText(pNodes[0])
-			if len(authorText)>0{
-				array :=strings.Split(authorText,"：")
-				if len(array) >=2{
+			if len(authorText) > 0 {
+				array := strings.Split(authorText, "：")
+				if len(array) >= 2 {
 					novel.Author = array[1]
 				}
 			}
 			statusText := htmlquery.InnerText(pNodes[1])
-			if len(statusText)>0{
-				array := strings.Split(statusText,"：")
-				if len(array)>=2{
-					list :=strings.Split(array[1],",")
-					if len(list)>=1{
+			if len(statusText) > 0 {
+				array := strings.Split(statusText, "：")
+				if len(array) >= 2 {
+					list := strings.Split(array[1], ",")
+					if len(list) >= 1 {
 						novel.Status = list[0]
 					}
 				}
@@ -61,11 +61,11 @@ func (p *ChapterListParser) Parse(crawlerUrl string, contents []byte) (*parser.P
 	if findNode != nil {
 		introText := htmlquery.InnerText(findNode)
 		rg := regexp.MustCompile(`\n`)
-		introText = rg.ReplaceAllString(introText,"")
+		introText = rg.ReplaceAllString(introText, "")
 		rg = regexp.MustCompile(`\t`)
-		introText = rg.ReplaceAllString(introText,"")
+		introText = rg.ReplaceAllString(introText, "")
 		rg = regexp.MustCompile(` `)
-		introText = rg.ReplaceAllString(introText,"")
+		introText = rg.ReplaceAllString(introText, "")
 		novel.Intro = introText
 	}
 	findNode = htmlquery.FindOne(root, "//div[@id='fmimg']/img")
@@ -81,7 +81,7 @@ func (p *ChapterListParser) Parse(crawlerUrl string, contents []byte) (*parser.P
 			if !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "https") {
 				link = u.Scheme + "://" + u.Host + link
 			}
-			novelChapter := parser.NovelChapter{Index: index+1, Name: htmlquery.InnerText(linkNode)}
+			novelChapter := parser.NovelChapter{Index: index + 1, Name: htmlquery.InnerText(linkNode)}
 			novel.Chapters[link] = &novelChapter
 			result.Requests[link] = parser.UrlParser{Parser: NewChapterDetailParser(&novel), UrlInfo: parser.UrlInfo{Url: link, Text: htmlquery.InnerText(linkNode)}}
 		}

@@ -1,4 +1,4 @@
-module ma-novel-crawler
+module github.com/marshhu/ma-novel-crawler
 
 go 1.14
 

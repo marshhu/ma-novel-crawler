@@ -2,7 +2,7 @@ package biquge
 
 import (
 	"github.com/antchfx/htmlquery"
-	"ma-novel-crawler/parser"
+	"github.com/marshhu/ma-novel-crawler/parser"
 	"net/url"
 	"strings"
 )

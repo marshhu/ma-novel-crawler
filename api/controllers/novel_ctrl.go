@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"ma-novel-crawler/service"
+	"github.com/marshhu/ma-novel-crawler/service"
 	"net/http"
 	"net/url"
 )
@@ -29,12 +29,11 @@ func (ctrl *NovelController) GenNovelSingleTxt(ctx *gin.Context) {
 	}
 
 	var buffer bytes.Buffer
-	for _,chapter := range novel.Chapters{
-		buffer.WriteString(chapter.Name+"\n\n")
-		buffer.WriteString(chapter.Content+"\n\n")
+	for _, chapter := range novel.Chapters {
+		buffer.WriteString(chapter.Name + "\n\n")
+		buffer.WriteString(chapter.Content + "\n\n")
 	}
 	contentType := "application/octet-stream;charset=UTF-8"
-
 
 	extraHeaders := map[string]string{
 		"Content-Disposition": fmt.Sprintf("attachment; filename=%s", url.QueryEscape(novel.Name+".txt")),
@@ -42,5 +41,5 @@ func (ctrl *NovelController) GenNovelSingleTxt(ctx *gin.Context) {
 
 	contentLength := buffer.Len()
 	ctx.DataFromReader(http.StatusOK, int64(contentLength), contentType, &buffer, extraHeaders)
-	ctx.JSON(http.StatusOK,novel)
+	ctx.JSON(http.StatusOK, novel)
 }

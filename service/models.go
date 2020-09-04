@@ -1,15 +1,15 @@
 package service
 
-import "ma-novel-crawler/parser"
+import "github.com/marshhu/ma-novel-crawler/parser"
 
 type Novel struct {
-	Name          string         `json:"name"`          //书名
-	Image         string         `json:"image"`         //封面图
-	Author        string         `json:"author"`        //作者
-	Intro         string         `json:"intro"`         //简介
-	Status        string         `json:"status"`        //状态  连载  完结
-	LatestChapter string         `json:"latestChapter"` //最新章节
-	UpdateTime    string         `json:"updateTime"`    //最近更新时间
+	Name          string            `json:"name"`          //书名
+	Image         string            `json:"image"`         //封面图
+	Author        string            `json:"author"`        //作者
+	Intro         string            `json:"intro"`         //简介
+	Status        string            `json:"status"`        //状态  连载  完结
+	LatestChapter string            `json:"latestChapter"` //最新章节
+	UpdateTime    string            `json:"updateTime"`    //最近更新时间
 	Chapters      ChapterCollection //章节
 }
 
@@ -22,7 +22,7 @@ type NovelChapter struct {
 type ChapterCollection []NovelChapter
 
 //Len()
-func (chapters ChapterCollection)Len() int {
+func (chapters ChapterCollection) Len() int {
 	return len(chapters)
 }
 
@@ -36,12 +36,12 @@ func (chapters ChapterCollection) Swap(i, j int) {
 	chapters[i], chapters[j] = chapters[j], chapters[i]
 }
 
-type FetchResult struct{
-    Url string
-    Content []byte
+type FetchResult struct {
+	Url     string
+	Content []byte
 }
 
-func(novel *Novel)FromModel(model *parser.Novel){
+func (novel *Novel) FromModel(model *parser.Novel) {
 	novel.Author = model.Author
 	novel.Name = model.Name
 	novel.Status = model.Status
@@ -50,4 +50,3 @@ func(novel *Novel)FromModel(model *parser.Novel){
 	novel.UpdateTime = model.UpdateTime
 	novel.LatestChapter = model.LatestChapter
 }
-

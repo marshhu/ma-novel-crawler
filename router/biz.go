@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"ma-novel-crawler/api"
+	"github.com/marshhu/ma-novel-crawler/api"
 )
 
 func userBizRouters(eng *gin.Engine) {

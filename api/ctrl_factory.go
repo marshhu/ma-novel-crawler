@@ -1,8 +1,8 @@
 package api
 
 import (
-	"ma-novel-crawler/api/controllers"
-	"ma-novel-crawler/service"
+	"github.com/marshhu/ma-novel-crawler/api/controllers"
+	"github.com/marshhu/ma-novel-crawler/service"
 )
 
 //控制器工厂

@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/marshhu/ma-novel-crawler/router"
 	"golang.org/x/net/context"
 	"log"
-	"ma-novel-crawler/router"
 	"net/http"
 	"os"
 	"os/signal"

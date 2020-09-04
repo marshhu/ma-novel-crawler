@@ -16,4 +16,3 @@ type NovelChapter struct {
 	Name    string `json:"Name"`    //章节名
 	Content string `json:"content"` //内容
 }
-
